@@ -1,0 +1,8 @@
+-- you can insert your seed here, where every line is one URL to be crawled
+-- if you split your seed in several files, you get split results for every
+-- one of those seed files.
+
+-- lines beginning with -- are comment lines
+
+http://www.example.com
+https://www.moreexample.com
