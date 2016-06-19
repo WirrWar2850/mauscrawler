@@ -7,45 +7,70 @@ import java.util.*;
 /**
  * Created by Fabi on 17.02.2015.
  */
-public class DirectedGraph<N extends Comparable> {
-    private List<N> nodes = new ArrayList<>();
+public class DirectedGraph<N extends Comparable<N>> {
+    private Map<String, N> nodes = new HashMap<>();
     private Map<N, List<DefaultEdge<N>>> edges = new TreeMap<>();
+    private List<DefaultEdge<N>> edgesList = new ArrayList<>(); // for internal edge checking!!!
 
     public synchronized void addVertex(N vertex) {
-        if(nodes.contains(vertex)) {
+        if(nodes.containsKey(vertex.toString())) {
             throw new RuntimeException("There is already a node with value " + vertex);
         }
-        nodes.add(vertex);
+        nodes.put(vertex.toString(), vertex);
         edges.put(vertex, new ArrayList<>());
     }
 
     public synchronized void addEdge(N start, N end) {
-        DefaultEdge<N> d = new DefaultEdge();
+        DefaultEdge<N> d = new DefaultEdge<>();
 
         if(!this.hasVertex(start) || !this.hasVertex(end)) {
-            throw new RuntimeException("Either start or end node is not in graph");
+            throw new RuntimeException("Either start (" + start + ") or end (" + end + ") node is not in graph");
         }
 
         d.setStartVertex(start);
         d.setEndVertex(end);
-        if(!this.getEdges().contains(d)) {
+        if(!this.edgesList.contains(d)) {
             edges.get(start).add(d);
+            edgesList.add(d);
         }
     }
 
+    public synchronized void addEdge(DefaultEdge<N> edge) {
+        if(!this.hasVertex(edge.getStartVertex()) || !this.hasVertex(edge.getEndVertex())) {
+            throw new RuntimeException("Either start (" + edge.getStartVertex() + ") or end (" + edge.getEndVertex() + ") node is not in graph");
+        }
+
+        if(this.edgesList.contains(edge)) {
+            return;
+        }
+        this.edges.get(edge.getStartVertex()).add(edge);
+        this.edgesList.add(edge);
+    }
+
     public synchronized boolean hasVertex(N vertex) {
-        return nodes.contains(vertex);
+        return nodes.values().contains(vertex);
+    }
+
+    public synchronized boolean hasVertex(Object id) {
+        return nodes.containsKey(id.toString());
     }
 
     public synchronized N getVertex(N vertex) {
-        if(this.nodes.contains(vertex)) {
-            return this.nodes.get(this.nodes.indexOf(vertex));
+        if(this.hasVertex(vertex)) {
+            return this.nodes.get(vertex.toString());
         }
         return null;
     }
 
-    public synchronized List<N> getVertices() {
-        return this.nodes;
+    public synchronized N getVertex(Object id) {
+        if(this.hasVertex(id)) {
+            return this.nodes.get(id.toString());
+        }
+        return null;
+    }
+
+    public synchronized Collection<N> getVertices() {
+        return this.nodes.values();
     }
 
     public synchronized List<DefaultEdge<N>> getEdges() {
@@ -63,7 +88,7 @@ public class DirectedGraph<N extends Comparable> {
     }
 
     public synchronized Integer distance(N from, N to) {
-        if(!nodes.contains(from) || !nodes.contains(to)) {
+        if(!this.hasVertex(from) || !this.hasVertex(to)) {
             return null;
         }
 
@@ -73,12 +98,12 @@ public class DirectedGraph<N extends Comparable> {
     public synchronized Map<N, Map<N, Integer>> getAdjacencyMatrix() {
         Map<N, Map<N, Integer>> matrix = new TreeMap<>();
 
-        for(N node : nodes) {
+        for(N node : nodes.values()) {
             matrix.put(node, new TreeMap<>());
             matrix.get(node).put(node, 0); // always reach itself
         }
 
-        for(N node : nodes) {
+        for(N node : nodes.values()) {
             for(DefaultEdge<N> edge : edges.get(node)) {
                 matrix.get(edge.getStartVertex()).put(edge.getEndVertex(), 1); // reachable in 1 step
             }
@@ -92,7 +117,7 @@ public class DirectedGraph<N extends Comparable> {
 
         for(N k : matrix.keySet()) {
             for(N i : matrix.keySet()) {
-                for(N j : nodes) {
+                for(N j : nodes.values()) {
                     if(matrix.get(i).containsKey(k) && matrix.get(k).containsKey(j)) {
                         Integer nDist = matrix.get(i).get(k) + matrix.get(k).get(j);
                         Integer oDist = matrix.get(i).containsKey(j) ? matrix.get(i).get(j) : null;
@@ -114,14 +139,14 @@ public class DirectedGraph<N extends Comparable> {
         Map<N, Map<N, Integer>> matrix = getAdjacencyMatrixTransitive();
 
         b.append(String.format("%4s", " "));
-        for(N node : nodes) {
+        for(N node : nodes.values()) {
             b.append(String.format("%4s", node));
         }
         b.append("\n");
 
-        for(N node : nodes) {
+        for(N node : nodes.values()) {
             b.append(String.format("%4s", node));
-            for(N nodeHelp : nodes) {
+            for(N nodeHelp : nodes.values()) {
                 if(matrix.get(node).containsKey(nodeHelp)) {
                     b.append(String.format("%4s", matrix.get(node).get(nodeHelp)));
                 } else {
@@ -156,7 +181,7 @@ public class DirectedGraph<N extends Comparable> {
 
         output.append("<graph id=\"" + graphId + "\" edgedefault=\"directed\">\n");
 
-        for(N node : this.nodes) {
+        for(N node : this.nodes.values()) {
             String optionalData = "";
             if(node instanceof DefaultNode) {
                 if(((DefaultNode) node).hasAttribute("title")) {

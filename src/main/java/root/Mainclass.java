@@ -62,7 +62,7 @@ public class Mainclass {
         config.addGroupContentFactory(new MausGroupMedianCSVExporterFactory());
 
         config.setNumberOfCrawlers(8);
-        config.setNumberOfWorkerThreads(16);
+        config.setNumberOfWorkerThreads(8);
         config.setCrawlDepth(4);
         config.setMaxPages(300);
         config.setPolitenessDelay(150);

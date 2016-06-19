@@ -54,6 +54,7 @@ public class DefaultNode<N extends Comparable<N>> implements Comparable<DefaultN
         if(o instanceof DefaultNode) {
             return ((DefaultNode) o).compareTo(this) == 0;
         }
-        return false;
+        System.out.println("oh oh");
+        return id.equals(o);
     }
 }

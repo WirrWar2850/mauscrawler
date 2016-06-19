@@ -18,11 +18,6 @@ public class GraphCrawler extends WebCrawler {
     private final static Pattern FILTER = Pattern.compile(".*(\\.(css|js|gif|jpe?g|png|mp3|mp3|zip|gz))$");
 
     public void addPage(Page page) {
-        if(!(page.getParseData() instanceof HtmlParseData)) {
-            // only HTML Pages are looked at
-            return;
-        }
-
         Map<String,Object> customData = ((HashMap<String,Object>)this.getMyController().getCustomData());
         DirectedGraph<DefaultNode<Integer>> graph = (DirectedGraph<DefaultNode<Integer>>)customData.get("graph");
 
@@ -45,7 +40,7 @@ public class GraphCrawler extends WebCrawler {
 
         graph.addVertex(n);
         if(page.getWebURL().getParentUrl() != null) {
-            graph.addEdge(new DefaultNode<>(page.getWebURL().getParentDocid()), n);
+            graph.addEdge(graph.getVertex(page.getWebURL().getParentDocid()), n);
         }
     }
 

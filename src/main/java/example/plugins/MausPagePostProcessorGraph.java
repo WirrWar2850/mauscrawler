@@ -24,16 +24,21 @@ public class MausPagePostProcessorGraph implements MausPagePostProcessorInterfac
                     Integer targetid = link.getDocid();
                     Integer sourceid = n.getAttribute("docid");
 
-                    if(graph.hasVertex(new DefaultNode<>(sourceid)) &&
-                            graph.hasVertex(new DefaultNode<>(targetid))) {
+                    if(graph.hasVertex(sourceid) &&
+                            graph.hasVertex(targetid)) {
 
                         DefaultEdge<DefaultNode<Integer>> edge = new DefaultEdge<>();
-                        edge.setStartVertex(new DefaultNode<>(sourceid));
-                        edge.setEndVertex(new DefaultNode<>(targetid));
+                        edge.setStartVertex(graph.getVertex(sourceid));
+                        edge.setEndVertex(graph.getVertex(targetid));
 
                         if (!edges.contains(edge)) {
                             count++;
-                            graph.addEdge(new DefaultNode<>(sourceid), new DefaultNode<>(targetid));
+                            try {
+                                graph.addEdge(edge);
+                            } catch(Exception e) {
+                                count--;
+                                System.out.println(e.getMessage());
+                            }
                         }
                     }
                 }
