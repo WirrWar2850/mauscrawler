@@ -1,6 +1,8 @@
 # mauscrawler
 A crawler4j based crawler for crawling and analyzing websites created during a data-mining course at university.
 
+This work is experimental in nature and not intended to be used with any serious intent.
+
 ## Description and motivation
 The crawler is supposed to work as a multithreaded application in order to maximize the utilization of available cpu power and particularly to minimize the bottleneck posed by the politeness-delay used for web-crawling. By crawling multiple websites at once, you get your results way faster than by doing this step by step.
 
